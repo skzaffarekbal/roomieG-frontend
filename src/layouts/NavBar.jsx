@@ -24,7 +24,7 @@ function NavBar() {
       <div className='navbar bg-base-200 shadow-sm'>
         <div className='flex-1'>
           <Link to={'/'} className='btn btn-ghost text-xl'>
-            🏡 Roomie
+            🏡 RoomieG
           </Link>
         </div>
         {user || token ? (
