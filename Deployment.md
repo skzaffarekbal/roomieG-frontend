@@ -1,4 +1,4 @@
-# Deployment
+# RoomieG Deployment
 
 - Sign up in AWS
 - Go EC2 Services
@@ -84,6 +84,29 @@ server {
 - after that restart nginx ```sudo systemctl restart nginx```
 - modify base URL in frontend project to ```/api```
 
+### When reload frontend 404 Not Found nginx/1.28.3 (Ubuntu) ERROR
+- This is a different Nginx issue, and it's very common with React SPAs.```/login``` route works when navigating inside the app, but when refresh: http://54.252.229.150/login the browser sends a new request directly to Nginx: ```GET /login```
+
+- Nginx looks for a real /login file/folder and returns:
+```
+404 Not Found
+nginx/1.28.3
+```
+
+- Fix: add try_files ```sudo nano /etc/nginx/sites-available/default```
+```
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+- Where old code was
+```
+location / {
+    try_files $uri $uri/ =404;
+}
+```
+
 
 ## Important
 - An unexpected process occupying a port, don't just restart the manager. Check: ```sudo ss -lntp | grep :7777```
@@ -99,4 +122,21 @@ pm2 delete <project_name>
 pm2 save
 ```
 
-
+## Add custom domain
+- Purchased domain name from ```godaddy.com```
+- signup on ```cloudflare``` & add a new domain name
+- change the nameservers on godaddy and point it to cloudflare
+- Add DNS record: roomieg.in to 54.252.229.150 ```cloudflare```
+```
+Type    Name    Content
+─────────────────────────────────
+A       @       54.252.229.150
+CNAME   www     roomieg.in
+```
+- Enable SSL for website 
+- Add PORT 443 for https in Inbound rules
+```
+HTTP       TCP 80   0.0.0.0/0
+Custom TCP TCP 7777 0.0.0.0/0
+HTTPS      TCP 443  0.0.0.0/0
+```
