@@ -4,8 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../utils/constant';
 import { logoutUser } from '../utils/userSlice';
 import Cookies from 'js-cookie';
+import { useState } from 'react';
 
 function NavBar() {
+  const [token, setToken] = useState(Cookies.get('token'));
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -13,12 +15,12 @@ function NavBar() {
     try {
       axios.post(BASE_URL + '/logout', {}, { withCredentials: true });
       dispatch(logoutUser());
+      setToken(null);
       navigate('/login');
     } catch (error) {
       console.error(error);
     }
   };
-  const token = Cookies.get('token');
   return (
     <div className='sticky top-0'>
       <div className='navbar bg-base-200 shadow-sm'>
