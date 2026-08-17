@@ -69,7 +69,18 @@ function NavBar() {
                   <Link to={'/requests'}>Requests</Link>
                 </li>
                 <li>
-                  <a>Premium</a>
+                  <Link to={'/premium'}>
+                    Premium{' '}
+                    <span
+                      className={`badge badge-xs ${user?.isPremium ? (user?.membershipType === 'gold' ? 'badge-warning' : 'bg-slate-400') : 'badge-primary'}`}
+                    >
+                      {user?.isPremium
+                        ? user?.membershipType === 'gold'
+                          ? 'Gold'
+                          : 'Silver'
+                        : 'Free'}
+                    </span>
+                  </Link>
                 </li>
                 <li>
                   <a>Settings</a>
