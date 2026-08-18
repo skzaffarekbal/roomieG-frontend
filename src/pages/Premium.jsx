@@ -16,7 +16,7 @@ function Premium() {
         withCredentials: true,
       });
 
-      if (res.data.isPremium) {
+      if (res?.data?.data?.isPremium) {
         dispatch(addUser(res?.data?.data));
       }
     } catch (error) {
