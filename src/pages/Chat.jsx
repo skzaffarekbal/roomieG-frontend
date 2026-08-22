@@ -16,8 +16,11 @@ function Chat() {
   const [input, setInput] = useState('');
   const [targetUser, setTargetUser] = useState(null);
   const [error, setError] = useState('');
+  const [isFetchingOld, setIsFetchingOld] = useState(false);
   const socketRef = useRef(null);
   const chatEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
+  const shouldAutoScroll = useRef(true);
 
   useEffect(() => {
     const fetchTargetUser = async () => {
@@ -43,6 +46,7 @@ function Chat() {
     socketRef.current = socket;
 
     socket.emit('joinChat', { loginUserId, targetUserId });
+
     socket.on('chatError', (message) => {
       setError(message);
       setTimeout(() => {
@@ -51,6 +55,7 @@ function Chat() {
     });
 
     socket.on('chatHistory', (chatHistory) => {
+      shouldAutoScroll.current = true;
       setMessages([...chatHistory]);
 
       const hasUnseen = chatHistory.some((msg) => msg.senderId === targetUserId && !msg.seen);
@@ -59,7 +64,29 @@ function Chat() {
       }
     });
 
+    socket.on('olderMessages', (olderMessages) => {
+      if (olderMessages.length > 0) {
+        shouldAutoScroll.current = false;
+        // Save scroll position before updating messages
+        const prevScrollHeight = chatContainerRef.current.scrollHeight;
+
+        setMessages((prevMessages) => [...olderMessages, ...prevMessages]);
+
+        // Restore scroll position after DOM updates
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            const newScrollHeight = chatContainerRef.current.scrollHeight;
+            chatContainerRef.current.scrollTop = newScrollHeight - prevScrollHeight;
+          }
+          setIsFetchingOld(false);
+        }, 0);
+      } else {
+        setIsFetchingOld(false); // No more messages to fetch
+      }
+    });
+
     socket.on('receivedMessage', (newMessage) => {
+      shouldAutoScroll.current = true;
       setMessages((prevMessages) => [...prevMessages, newMessage]);
 
       if (newMessage.senderId === targetUserId) {
@@ -81,6 +108,7 @@ function Chat() {
 
     return () => {
       socket.off('chatHistory');
+      socket.off('olderMessages');
       socket.off('receivedMessage');
       socket.off('messagesSeen');
       socket.disconnect();
@@ -88,16 +116,30 @@ function Chat() {
     };
   }, [loginUserId, targetUserId]);
 
-  // Automatically scrolls to the newest message
+  // Automatically scrolls to the newest message conditionally
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (shouldAutoScroll.current) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
+
+  const handleScroll = (e) => {
+    if (e.target.scrollTop === 0 && !isFetchingOld) {
+      setIsFetchingOld(true);
+      socketRef.current.emit('fetchOldMessages', {
+        loginUserId,
+        targetUserId,
+        skip: messages.length,
+      });
+    }
+  };
 
   const handleSend = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     if (socketRef.current) {
+      shouldAutoScroll.current = true;
       socketRef.current.emit('sendMessage', {
         firstName: loginUser?.firstName,
         loginUserId,
@@ -133,13 +175,21 @@ function Chat() {
               <h3 className='font-bold text-base-content text-sm md:text-base leading-none'>
                 {targetUser?.firstName + ' ' + targetUser?.lastName}
               </h3>
-              {/* <span className='text-xs text-success font-medium'>Active now</span> */}
             </div>
           </div>
         </div>
 
         {/* 2. CHAT HISTORY CONTAINER */}
-        <div className='flex-1 overflow-y-auto p-4 space-y-3 bg-base-200/50'>
+        <div
+          className='flex-1 overflow-y-auto p-4 space-y-3 bg-base-200/50'
+          ref={chatContainerRef}
+          onScroll={handleScroll}
+        >
+          {isFetchingOld && (
+            <div className='flex justify-center my-2'>
+              <span className='loading loading-spinner loading-sm text-primary'></span>
+            </div>
+          )}
           {messages.map((msg) => (
             <div
               key={msg._id}
