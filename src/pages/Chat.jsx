@@ -44,17 +44,38 @@ function Chat() {
     socket.emit('joinChat', { loginUserId, targetUserId });
 
     socket.on('chatHistory', (chatHistory) => {
-      // Asynchronously queue state update to avoid synchronous setState inside effect body
-      queueMicrotask(() => {
-        setMessages([...chatHistory]);
-      });
+      setMessages([...chatHistory]);
+
+      const hasUnseen = chatHistory.some((msg) => msg.senderId === targetUserId && !msg.seen);
+      if (hasUnseen) {
+        socket.emit('markAsSeen', { loginUserId, targetUserId });
+      }
     });
 
     socket.on('receivedMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      if (newMessage.senderId === targetUserId) {
+        socket.emit('markAsSeen', { loginUserId, targetUserId });
+      }
+    });
+
+    socket.on('messagesSeen', ({ seenBy }) => {
+      if (seenBy === targetUserId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.senderId === loginUserId && !msg.seen
+              ? { ...msg, seen: true, seenAt: new Date().toISOString() }
+              : msg,
+          ),
+        );
+      }
     });
 
     return () => {
+      socket.off('chatHistory');
+      socket.off('receivedMessage');
+      socket.off('messagesSeen');
       socket.disconnect();
       socketRef.current = null;
     };
