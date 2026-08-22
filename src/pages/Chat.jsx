@@ -15,6 +15,7 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [targetUser, setTargetUser] = useState(null);
+  const [error, setError] = useState('');
   const socketRef = useRef(null);
   const chatEndRef = useRef(null);
 
@@ -42,6 +43,12 @@ function Chat() {
     socketRef.current = socket;
 
     socket.emit('joinChat', { loginUserId, targetUserId });
+    socket.on('chatError', (message) => {
+      setError(message);
+      setTimeout(() => {
+        setError('');
+      }, 3000);
+    });
 
     socket.on('chatHistory', (chatHistory) => {
       setMessages([...chatHistory]);
@@ -102,98 +109,107 @@ function Chat() {
   };
 
   return (
-    <div className='w-full max-w-md h-[85vh] flex flex-col bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden'>
-      {/* 1. HEADER */}
-      <div className='p-4 bg-base-100 border-b border-base-300 flex items-center justify-between shadow-sm'>
-        <div className='flex items-center gap-3'>
-          <div className='avatar online'>
-            <div className='w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2'>
-              <img
-                src={targetUser?.photoUrl}
-                alt={(targetUser?.firstName[0] || '') + (targetUser?.lastName[0] || '') || 'User'}
-              />
-            </div>
-          </div>
-          <div>
-            <h3 className='font-bold text-base-content text-sm md:text-base leading-none'>
-              {targetUser?.firstName + ' ' + targetUser?.lastName}
-            </h3>
-            {/* <span className='text-xs text-success font-medium'>Active now</span> */}
+    <>
+      {error && (
+        <div className='toast toast-top toast-center'>
+          <div className='alert alert-error'>
+            <span>{error}</span>
           </div>
         </div>
-      </div>
-
-      {/* 2. CHAT HISTORY CONTAINER */}
-      <div className='flex-1 overflow-y-auto p-4 space-y-3 bg-base-200/50'>
-        {messages.map((msg) => (
-          <div
-            key={msg._id}
-            className={`chat ${msg.senderId == loginUserId ? 'chat-end' : 'chat-start'}`}
-          >
-            <div className='chat-image avatar'>
-              <div className='w-10 rounded-full'>
+      )}
+      <div className='w-full max-w-md h-[85vh] flex flex-col bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden'>
+        {/* 1. HEADER */}
+        <div className='p-4 bg-base-100 border-b border-base-300 flex items-center justify-between shadow-sm'>
+          <div className='flex items-center gap-3'>
+            <div className='avatar online'>
+              <div className='w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2'>
                 <img
-                  alt={
-                    (msg.senderId == loginUserId
-                      ? loginUser?.firstName[0] || ''
-                      : targetUser?.firstName[0] || '') +
-                      (msg.senderId == loginUserId
-                        ? loginUser?.lastName[0] || ''
-                        : targetUser?.lastName[0] || '') || 'User'
-                  }
-                  src={msg.senderId == loginUserId ? loginUser?.photoUrl : targetUser?.photoUrl}
+                  src={targetUser?.photoUrl}
+                  alt={(targetUser?.firstName[0] || '') + (targetUser?.lastName[0] || '') || 'User'}
                 />
               </div>
             </div>
-            <div className='chat-header'>
-              {msg.senderId == loginUserId
-                ? loginUser?.firstName + ' ' + loginUser?.lastName
-                : targetUser?.firstName + ' ' + targetUser?.lastName}
-              <time className='chat-footer opacity-50'>
-                {format(new Date(msg.createdAt), 'd MMM yy, h:mm a')}
-              </time>
+            <div>
+              <h3 className='font-bold text-base-content text-sm md:text-base leading-none'>
+                {targetUser?.firstName + ' ' + targetUser?.lastName}
+              </h3>
+              {/* <span className='text-xs text-success font-medium'>Active now</span> */}
             </div>
-            <div
-              className={`chat-bubble text-sm min-h-0 shadow-sm ${
-                msg.senderId == loginUserId ? 'chat-bubble-primary' : 'chat-bubble-neutral'
-              }`}
-            >
-              {msg.text}
-            </div>
-            {msg.senderId == loginUserId ? (
-              <div className='chat-footer opacity-50'>
-                {msg.seen
-                  ? `Seen at ${format(new Date(msg.seenAt), 'd MMM yy, h:mm a')}`
-                  : 'Delivered'}
-              </div>
-            ) : (
-              ''
-            )}
           </div>
-        ))}
-        <div ref={chatEndRef} />
-      </div>
+        </div>
 
-      {/* 3. BOTTOM INPUT FOOTER */}
-      <form
-        onSubmit={handleSend}
-        className='p-3 bg-base-100 border-t border-base-300 flex gap-2 items-center'
-      >
-        <input
-          type='text'
-          placeholder='Type a message...'
-          className='input input-bordered input-md flex-1 rounded-xl bg-base-200/50 focus:outline-none text-sm'
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button
-          type='submit'
-          className='btn btn-primary btn-md rounded-xl font-medium px-4 shadow-md'
+        {/* 2. CHAT HISTORY CONTAINER */}
+        <div className='flex-1 overflow-y-auto p-4 space-y-3 bg-base-200/50'>
+          {messages.map((msg) => (
+            <div
+              key={msg._id}
+              className={`chat ${msg.senderId == loginUserId ? 'chat-end' : 'chat-start'}`}
+            >
+              <div className='chat-image avatar'>
+                <div className='w-10 rounded-full'>
+                  <img
+                    alt={
+                      (msg.senderId == loginUserId
+                        ? loginUser?.firstName[0] || ''
+                        : targetUser?.firstName[0] || '') +
+                        (msg.senderId == loginUserId
+                          ? loginUser?.lastName[0] || ''
+                          : targetUser?.lastName[0] || '') || 'User'
+                    }
+                    src={msg.senderId == loginUserId ? loginUser?.photoUrl : targetUser?.photoUrl}
+                  />
+                </div>
+              </div>
+              <div className='chat-header'>
+                {msg.senderId == loginUserId
+                  ? loginUser?.firstName + ' ' + loginUser?.lastName
+                  : targetUser?.firstName + ' ' + targetUser?.lastName}
+                <time className='chat-footer opacity-50'>
+                  {format(new Date(msg.createdAt), 'd MMM yy, h:mm a')}
+                </time>
+              </div>
+              <div
+                className={`chat-bubble text-sm min-h-0 shadow-sm ${
+                  msg.senderId == loginUserId ? 'chat-bubble-primary' : 'chat-bubble-neutral'
+                }`}
+              >
+                {msg.text}
+              </div>
+              {msg.senderId == loginUserId ? (
+                <div className='chat-footer opacity-50'>
+                  {msg.seen
+                    ? `Seen at ${format(new Date(msg.seenAt), 'd MMM yy, h:mm a')}`
+                    : 'Delivered'}
+                </div>
+              ) : (
+                ''
+              )}
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* 3. BOTTOM INPUT FOOTER */}
+        <form
+          onSubmit={handleSend}
+          className='p-3 bg-base-100 border-t border-base-300 flex gap-2 items-center'
         >
-          Send
-        </button>
-      </form>
-    </div>
+          <input
+            type='text'
+            placeholder='Type a message...'
+            className='input input-bordered input-md flex-1 rounded-xl bg-base-200/50 focus:outline-none text-sm'
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button
+            type='submit'
+            className='btn btn-primary btn-md rounded-xl font-medium px-4 shadow-md'
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </>
   );
 }
 export default Chat;
