@@ -53,6 +53,8 @@ function Body() {
 
     socket.on('unreadCountUpdate', (data) => {
       dispatch(incrementUnreadCount(data.senderId));
+      const audio = new Audio('/bell.mp3');
+      audio.play().catch((err) => console.log(err));
     });
 
     return () => {
