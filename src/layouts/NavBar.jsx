@@ -15,9 +15,11 @@ function NavBar() {
   const handleLogout = async () => {
     try {
       axios.post(BASE_URL + '/logout', {}, { withCredentials: true });
-      dispatch(logoutUser());
-      setToken(null);
-      navigate('/login');
+      setTimeout(() => {
+        dispatch(logoutUser());
+        setToken(null);
+        navigate('/login');
+      }, 100);
     } catch (error) {
       console.error(error);
     }
