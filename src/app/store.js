@@ -3,6 +3,7 @@ import userReducer from '../utils/userSlice';
 import feedSlice from '../utils/feedSlice';
 import connectionSlice from '../utils/connectionSlice';
 import requestSlice from '../utils/requestSlice';
+import unreadCountSlice from '../utils/unreadCountSlice';
 
 // 1. Combine all your individual feature slices
 const appReducer = combineReducers({
@@ -10,6 +11,7 @@ const appReducer = combineReducers({
   feed: feedSlice,
   connection: connectionSlice,
   request: requestSlice,
+  unreadCount: unreadCountSlice,
 });
 
 // 2. Create a root reducer that can intercept the logout action

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BASE_URL } from '../utils/constant';
 import { addConnection } from '../utils/connectionSlice';
@@ -7,9 +7,11 @@ import { Link } from 'react-router-dom';
 
 function Connections() {
   const connection = useSelector((state) => state.connection);
+  const unreadCount = useSelector((state) => state.unreadCount);
+  const { userWiseUnreadCounts } = unreadCount;
   const dispatch = useDispatch();
 
-  const fetchConnection = async () => {
+  const fetchConnection = useCallback(async () => {
     try {
       const connectionRes = await axios.get(BASE_URL + '/user/connections', {
         withCredentials: true,
@@ -18,11 +20,11 @@ function Connections() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchConnection();
-  }, []);
+  }, [fetchConnection]);
 
   if (!connection?.length)
     return (
@@ -48,7 +50,16 @@ function Connections() {
                   <img alt='photo' className='w-20 h-20 rounded-full object-cover' src={photoUrl} />
                 </div>
                 <div className='text-left'>
-                  <h2 className='font-bold text-xl'>{firstName + ' ' + lastName}</h2>
+                  <h2 className='font-bold text-xl'>
+                    {firstName + ' ' + lastName}{' '}
+                    {userWiseUnreadCounts[_id] ? (
+                      <span className='badge badge-xs badge-error'>
+                        {userWiseUnreadCounts[_id]}
+                      </span>
+                    ) : (
+                      ''
+                    )}
+                  </h2>
                   {age && gender && <p>{age + ', ' + gender}</p>}
                   <p className='h-48px line-clamp-2 overflow-hidden'>{about}</p>
                 </div>
