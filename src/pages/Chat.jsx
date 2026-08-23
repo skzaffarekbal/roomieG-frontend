@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { createSocketConnection } from '../utils/socket';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { BASE_URL } from '../utils/constant';
 import { format } from 'date-fns';
+import { resetUnreadCount } from '../utils/unreadCountSlice';
 
 function Chat() {
   const { targetUserId } = useParams();
   const loginUser = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const loginUserId = loginUser?._id;
 
@@ -25,7 +27,7 @@ function Chat() {
   useEffect(() => {
     const fetchTargetUser = async () => {
       try {
-        const targetUserRes = await axios.get(BASE_URL + '/user/' + targetUserId, {
+        const targetUserRes = await axios.get(BASE_URL + '/user/profile/' + targetUserId, {
           withCredentials: true,
         });
         setTargetUser(targetUserRes?.data?.data);
@@ -57,6 +59,8 @@ function Chat() {
     socket.on('chatHistory', (chatHistory) => {
       shouldAutoScroll.current = true;
       setMessages([...chatHistory]);
+
+      dispatch(resetUnreadCount(targetUserId));
 
       const hasUnseen = chatHistory.some((msg) => msg.senderId === targetUserId && !msg.seen);
       if (hasUnseen) {
@@ -114,7 +118,7 @@ function Chat() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [loginUserId, targetUserId]);
+  }, [loginUserId, targetUserId, dispatch]);
 
   // Automatically scrolls to the newest message conditionally
   useEffect(() => {
