@@ -1,28 +1,27 @@
-import axios from 'axios';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BASE_URL } from '../utils/constant';
-import { addFeed } from '../utils/feedSlice';
+import { addFeed } from '../redux/feedSlice';
 import UserCard from '../components/UserCard';
+import { getFeedApi } from '../api/feedApi';
 
 function Feed() {
   const feed = useSelector((state) => state.feed);
   const dispatch = useDispatch();
 
-  const getFeed = async () => {
+  const getFeed = useCallback(async () => {
     if (feed?.length) return;
 
     try {
-      const feedRes = await axios.get(BASE_URL + '/feed', { withCredentials: true });
-      dispatch(addFeed(feedRes?.data?.data));
+      const feedRes = await getFeedApi();
+      dispatch(addFeed(feedRes?.data));
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [dispatch, feed?.length]);
 
   useEffect(() => {
     getFeed();
-  }, []);
+  }, [getFeed]);
 
   if (!feed?.length)
     return (

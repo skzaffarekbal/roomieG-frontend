@@ -1,28 +1,24 @@
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { BASE_URL } from '../utils/constant';
-import { useEffect } from 'react';
-import { addRequest, removeRequest } from '../utils/requestSlice';
+import { useCallback, useEffect } from 'react';
+import { addRequest, removeRequest } from '../redux/requestSlice';
+import { getReceivedRequestsApi, reviewRequestApi } from '../api/requestApi';
 
 function Requests() {
   const request = useSelector((state) => state.request);
   const dispatch = useDispatch();
 
-  const fetchRequest = async () => {
+  const fetchRequest = useCallback(async () => {
     try {
-      let resRequest = await axios.get(BASE_URL + '/user/request/received', {
-        withCredentials: true,
-      });
-
-      dispatch(addRequest(resRequest.data.data));
+      const resRequest = await getReceivedRequestsApi();
+      dispatch(addRequest(resRequest.data));
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [dispatch]);
 
   const reviewRequest = async (status, _id) => {
     try {
-      axios.post(BASE_URL + '/request/review/' + status + '/' + _id, {}, { withCredentials: true });
+      await reviewRequestApi(status, _id);
       dispatch(removeRequest(_id));
     } catch (error) {
       console.error(error);
@@ -31,7 +27,7 @@ function Requests() {
 
   useEffect(() => {
     fetchRequest();
-  }, []);
+  }, [fetchRequest]);
 
   if (!request?.length)
     return (

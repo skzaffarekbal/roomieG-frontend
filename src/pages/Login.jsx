@@ -1,9 +1,8 @@
-import axios from 'axios';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addUser } from '../utils/userSlice';
+import { addUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
-import { BASE_URL } from '../utils/constant';
+import { loginApi, registerApi } from '../api/authApi';
 
 function Login() {
   // TODO: Convert this part into react v19 new feature.
@@ -24,15 +23,11 @@ function Login() {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.post(
-        BASE_URL + '/login',
-        {
-          emailId: email,
-          password,
-        },
-        { withCredentials: true },
-      );
-      dispatch(addUser(res.data.user));
+      const data = await loginApi({
+        emailId: email,
+        password,
+      });
+      dispatch(addUser(data.user));
       setLoading(false);
       navigate('/');
     } catch (error) {
@@ -46,17 +41,13 @@ function Login() {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.post(
-        BASE_URL + '/register',
-        {
-          firstName,
-          lastName,
-          emailId: email,
-          password,
-        },
-        { withCredentials: true },
-      );
-      dispatch(addUser(res.data.user));
+      const data = await registerApi({
+        firstName,
+        lastName,
+        emailId: email,
+        password,
+      });
+      dispatch(addUser(data.user));
       setLoading(false);
       navigate('/profile');
     } catch (error) {

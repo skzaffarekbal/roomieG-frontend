@@ -1,11 +1,11 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import userReducer from '../utils/userSlice';
-import feedSlice from '../utils/feedSlice';
-import connectionSlice from '../utils/connectionSlice';
-import requestSlice from '../utils/requestSlice';
-import unreadCountSlice from '../utils/unreadCountSlice';
+import userReducer from './userSlice';
+import feedSlice from './feedSlice';
+import connectionSlice from './connectionSlice';
+import requestSlice from './requestSlice';
+import unreadCountSlice from './unreadCountSlice';
 
-// 1. Combine all your individual feature slices
+// 1. Combine all individual feature slices
 const appReducer = combineReducers({
   user: userReducer,
   feed: feedSlice,
@@ -26,12 +26,3 @@ const rootReducer = (state, action) => {
 export const store = configureStore({
   reducer: rootReducer,
 });
-
-// export const store = configureStore({
-//   reducer: {
-//     user: userReducer,
-//     feed: feedSlice,
-//     connection: connectionSlice,
-//     request: requestSlice,
-//   },
-// });

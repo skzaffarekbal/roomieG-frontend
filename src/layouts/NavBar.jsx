@@ -1,8 +1,7 @@
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { BASE_URL } from '../utils/constant';
-import { logoutUser } from '../utils/userSlice';
+import { logoutUser } from '../redux/userSlice';
+import { logoutApi } from '../api/authApi';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 
@@ -14,7 +13,7 @@ function NavBar() {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
-      axios.post(BASE_URL + '/logout', {}, { withCredentials: true });
+      await logoutApi();
       setTimeout(() => {
         dispatch(logoutUser());
         setToken(null);

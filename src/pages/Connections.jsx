@@ -1,9 +1,8 @@
-import axios from 'axios';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BASE_URL } from '../utils/constant';
-import { addConnection } from '../utils/connectionSlice';
+import { addConnection } from '../redux/connectionSlice';
 import { Link } from 'react-router-dom';
+import { getConnectionsApi } from '../api/connectionApi';
 
 function Connections() {
   const connection = useSelector((state) => state.connection);
@@ -13,10 +12,8 @@ function Connections() {
 
   const fetchConnection = useCallback(async () => {
     try {
-      const connectionRes = await axios.get(BASE_URL + '/user/connections', {
-        withCredentials: true,
-      });
-      dispatch(addConnection(connectionRes?.data?.data));
+      const connectionRes = await getConnectionsApi();
+      dispatch(addConnection(connectionRes?.data));
     } catch (error) {
       console.error(error);
     }
