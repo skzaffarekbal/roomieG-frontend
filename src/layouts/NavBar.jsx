@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../utils/constant';
-import { logoutUser } from '../utils/userSlice';
+import { logoutUser } from '../redux/userSlice';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 

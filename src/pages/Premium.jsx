@@ -1,7 +1,7 @@
 import axios from 'axios';
 import Tick from '../assets/icon/Tick';
 import { BASE_URL } from '../utils/constant';
-import { addUser } from '../utils/userSlice';
+import { addUser } from '../redux/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 

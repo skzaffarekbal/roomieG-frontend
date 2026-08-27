@@ -5,10 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../utils/constant.js';
-import { addUser } from '../utils/userSlice.js';
+import { addUser } from '../redux/userSlice.js';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { incrementUnreadCount, setUnreadCounts } from '../utils/unreadCountSlice.js';
+import { incrementUnreadCount, setUnreadCounts } from '../redux/unreadCountSlice.js';
 import { createSocketConnection } from '../utils/socket.js';
 
 function Body() {

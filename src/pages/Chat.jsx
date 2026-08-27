@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { BASE_URL } from '../utils/constant';
 import { format } from 'date-fns';
-import { resetUnreadCount } from '../utils/unreadCountSlice';
+import { resetUnreadCount } from '../redux/unreadCountSlice';
 
 function Chat() {
   const { targetUserId } = useParams();
