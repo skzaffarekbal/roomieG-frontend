@@ -1,9 +1,8 @@
-import axios from 'axios';
 import Tick from '../assets/icon/Tick';
-import { BASE_URL } from '../utils/constant';
 import { addUser } from '../redux/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
+import { verifyPremiumApi, createPaymentOrderApi } from '../api/paymentApi';
 
 function Premium() {
   const dispatch = useDispatch();
@@ -12,12 +11,10 @@ function Premium() {
 
   const verifyPremiumUser = async () => {
     try {
-      const res = await axios.get(BASE_URL + '/premium/verify', {
-        withCredentials: true,
-      });
+      const res = await verifyPremiumApi();
 
-      if (res?.data?.data?.isPremium) {
-        dispatch(addUser(res?.data?.data));
+      if (res?.data?.isPremium) {
+        dispatch(addUser(res?.data));
       }
     } catch (error) {
       console.error('Verification failed:', error);
@@ -33,15 +30,9 @@ function Premium() {
       return;
     }
     try {
-      const order = await axios.post(
-        BASE_URL + '/payment/create',
-        {
-          membershipType: membershipType,
-        },
-        { withCredentials: true },
-      );
+      const order = await createPaymentOrderApi(membershipType);
 
-      const { amount, keyId, currency, notes, orderId } = order.data;
+      const { amount, keyId, currency, notes, orderId } = order;
       const options = {
         key: keyId,
         amount,

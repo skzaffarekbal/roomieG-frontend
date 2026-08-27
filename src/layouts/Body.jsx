@@ -3,13 +3,13 @@ import NavBar from './NavBar';
 import Footer from './Footer';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect } from 'react';
-import axios from 'axios';
-import { BASE_URL } from '../utils/constant.js';
 import { addUser } from '../redux/userSlice.js';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { incrementUnreadCount, setUnreadCounts } from '../redux/unreadCountSlice.js';
 import { createSocketConnection } from '../utils/socket.js';
+import { viewProfileApi } from '../api/profileApi.js';
+import { getUnreadChatsCountApi } from '../api/chatApi.js';
 
 function Body() {
   const dispatch = useDispatch();
@@ -19,20 +19,18 @@ function Body() {
   const fetchUser = useCallback(async () => {
     if (userData) return;
     try {
-      const res = await axios.get(BASE_URL + '/profile/view', { withCredentials: true });
-      dispatch(addUser(res.data.data));
+      const data = await viewProfileApi();
+      dispatch(addUser(data.data));
     } catch (error) {
       console.error(error);
-      if (error.status === 401) navigate('/login');
+      if (error?.response?.status === 401 || error?.status === 401) navigate('/login');
     }
   }, [dispatch, navigate, userData]);
 
   const fetchUnreadCounts = useCallback(async () => {
     try {
-      const res = await axios.get(BASE_URL + '/user/unread-chats-count', {
-        withCredentials: true,
-      });
-      dispatch(setUnreadCounts(res.data.data));
+      const data = await getUnreadChatsCountApi();
+      dispatch(setUnreadCounts(data.data));
     } catch (error) {
       console.error(error);
     }
