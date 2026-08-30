@@ -1,4 +1,4 @@
-function Tick(props) {
+function TickIcon(props) {
   const { className } = props;
   return (
     <svg
@@ -13,4 +13,4 @@ function Tick(props) {
   );
 }
 
-export default Tick;
+export default TickIcon;
