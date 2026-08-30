@@ -1,10 +1,10 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import Footer from './Footer';
+import SettingsModal from '../components/SettingsModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect } from 'react';
 import { addUser } from '../redux/userSlice.js';
-import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { incrementUnreadCount, setUnreadCounts } from '../redux/unreadCountSlice.js';
 import { createSocketConnection } from '../utils/socket.js';
@@ -14,7 +14,11 @@ import { getUnreadChatsCountApi } from '../api/chatApi.js';
 function Body() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const userData = useSelector((store) => store.user);
+
+  const isPublicPath = ['/', '/landing', '/login'].includes(location.pathname);
+  const userId = userData?._id;
 
   const fetchUser = useCallback(async () => {
     if (userData) return;
@@ -23,9 +27,11 @@ function Body() {
       dispatch(addUser(data.data));
     } catch (error) {
       console.error(error);
-      if (error?.response?.status === 401 || error?.status === 401) navigate('/login');
+      if ((error?.response?.status === 401 || error?.status === 401) && !isPublicPath) {
+        navigate('/login');
+      }
     }
-  }, [dispatch, navigate, userData]);
+  }, [dispatch, navigate, userData, isPublicPath]);
 
   const fetchUnreadCounts = useCallback(async () => {
     try {
@@ -37,17 +43,20 @@ function Body() {
   }, [dispatch]);
 
   useEffect(() => {
-    let token = Cookies.get('token');
-    if (token) fetchUser();
-    else navigate('/login');
-  }, [fetchUser, navigate]);
+    const token = Cookies.get('token');
+    if (token) {
+      fetchUser();
+    } else if (!isPublicPath) {
+      navigate('/login');
+    }
+  }, [fetchUser, navigate, isPublicPath]);
 
   useEffect(() => {
-    if (!userData) return;
+    if (!userId) return;
     fetchUnreadCounts();
 
     const socket = createSocketConnection();
-    socket.emit('chatNotification', { loginUserId: userData._id });
+    socket.emit('chatNotification', { loginUserId: userId });
 
     socket.on('unreadCountUpdate', (data) => {
       dispatch(incrementUnreadCount(data.senderId));
@@ -58,13 +67,16 @@ function Body() {
     return () => {
       socket.disconnect();
     };
-  }, [userData, fetchUnreadCounts, dispatch]);
+  }, [userId, fetchUnreadCounts, dispatch]);
 
   return (
-    <div className='flex flex-col min-h-screen'>
+    <div className='flex flex-col min-h-screen bg-base-100 text-base-content selection:bg-primary selection:text-primary-content'>
       <NavBar />
-      <Outlet />
+      <main className='flex-1 flex flex-col'>
+        <Outlet />
+      </main>
       <Footer />
+      <SettingsModal />
     </div>
   );
 }

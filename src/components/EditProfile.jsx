@@ -1,148 +1,163 @@
 import { useState } from 'react';
 import UserCard from './UserCard';
-import { useDispatch } from 'react-redux';
-import { addUser } from '../redux/userSlice';
-import { editProfileApi } from '../api/profileApi';
+import BasicProfileForm from './profile/BasicProfileForm';
+import OccupationForm from './profile/OccupationForm';
+import LocationForm from './profile/LocationForm';
+import PhotoForm from './profile/PhotoForm';
+import LifestyleForm from './profile/LifestyleForm';
+import HousingForm from './profile/HousingForm';
+import PreferencesPrivacyForm from './profile/PreferencesPrivacyForm';
+import PasswordForm from './profile/PasswordForm';
+import { useSelector } from 'react-redux';
+// import { getProfileCompletionApi } from '../api/profileApi';
+
+const SECTIONS = [
+  { id: 'basic', label: 'Basic Info', icon: '👤' },
+  { id: 'occupation', label: 'Occupation', icon: '💼' },
+  { id: 'location', label: 'Location', icon: '📍' },
+  { id: 'photo', label: 'Photo', icon: '📷' },
+  { id: 'lifestyle', label: 'Lifestyle', icon: '✨' },
+  { id: 'housing', label: 'Housing & Budget', icon: '🏠' },
+  { id: 'preferences', label: 'Preferences', icon: '⚙️' },
+  { id: 'password', label: 'Password', icon: '🔒' },
+];
 
 const EditProfile = ({ user }) => {
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastName] = useState(user.lastName);
-  const [photoUrl, setPhotoUrl] = useState(user.photoUrl);
-  const [age, setAge] = useState(user.age || '');
-  const [gender, setGender] = useState(user.gender || '');
-  const [about, setAbout] = useState(user.about || '');
-  const [error, setError] = useState('');
-  const dispatch = useDispatch();
-  const [showToast, setShowToast] = useState(false);
+  const [activeSection, setActiveSection] = useState('basic');
+  const [livePreviewUser, setLivePreviewUser] = useState(user);
 
-  const saveProfile = async () => {
-    //Clear Errors
-    setError('');
-    try {
-      const res = await editProfileApi({
-        firstName,
-        lastName,
-        photoUrl,
-        age,
-        gender,
-        about,
-      });
-      dispatch(addUser(res?.data));
-      setShowToast(true);
-      setError('');
-      setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
-    } catch (err) {
-      setError(err?.response?.data?.error);
+  const { completionData, loading } = useSelector((state) => state.profileCompletion);
+
+  const handleUpdateLivePreview = (updatedFields) => {
+    setLivePreviewUser((prev) => {
+      const updated = { ...prev, ...updatedFields };
+      // Deep merge for nested objects
+      if (updatedFields.occupation) {
+        updated.occupation = { ...(prev.occupation || {}), ...updatedFields.occupation };
+      }
+      if (updatedFields.location) {
+        updated.location = { ...(prev.location || {}), ...updatedFields.location };
+      }
+      if (updatedFields.lifestyle) {
+        updated.lifestyle = { ...(prev.lifestyle || {}), ...updatedFields.lifestyle };
+      }
+      if (updatedFields.housing) {
+        updated.housing = { ...(prev.housing || {}), ...updatedFields.housing };
+      }
+      return updated;
+    });
+  };
+
+  const renderActiveSectionForm = () => {
+    switch (activeSection) {
+      case 'basic':
+        return <BasicProfileForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'occupation':
+        return <OccupationForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'location':
+        return <LocationForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'photo':
+        return <PhotoForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'lifestyle':
+        return <LifestyleForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'housing':
+        return <HousingForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
+      case 'preferences':
+        return <PreferencesPrivacyForm user={user} />;
+      case 'password':
+        return <PasswordForm />;
+      default:
+        return <BasicProfileForm user={user} onUpdateLivePreview={handleUpdateLivePreview} />;
     }
   };
 
+  const completionPercentage =
+    user?.profileCompleted || completionData?.profileCompleted
+      ? 100
+      : completionData?.completionPercentage;
+
   return (
-    <>
-      <div className='flex justify-center my-10'>
-        <div className='flex justify-center mx-10'>
-          <div className='card bg-base-300 w-96 shadow-xl'>
-            <div className='card-body'>
-              <h2 className='card-title justify-center'>Edit Profile</h2>
-              <div>
-                <label className='form-control w-full max-w-xs my-2'>
-                  <div className='label'>
-                    <span className='label-text'>First Name:</span>
-                  </div>
-                  <input
-                    type='text'
-                    value={firstName}
-                    className='input input-bordered w-full max-w-xs'
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                </label>
-                <label className='form-control w-full max-w-xs my-2'>
-                  <label className='form-control w-full max-w-xs my-2'>
-                    <div className='label'>
-                      <span className='label-text'>Last Name:</span>
-                    </div>
-                    <input
-                      type='text'
-                      value={lastName}
-                      className='input input-bordered w-full max-w-xs'
-                      onChange={(e) => setLastName(e.target.value)}
-                    />
-                  </label>
-                  <div className='label'>
-                    <span className='label-text'>Photo URL :</span>
-                  </div>
-                  <input
-                    type='url'
-                    value={photoUrl}
-                    className='input input-bordered w-full max-w-xs'
-                    onChange={(e) => setPhotoUrl(e.target.value)}
-                  />
-                </label>
-                <label className='form-control w-full max-w-xs my-2'>
-                  <div className='label'>
-                    <span className='label-text'>Age:</span>
-                  </div>
-                  <input
-                    type='number'
-                    value={age}
-                    min={18}
-                    max={100}
-                    className='input input-bordered w-full max-w-xs'
-                    onChange={(e) => setAge(e.target.value)}
-                  />
-                </label>
-                <label className='form-control w-full max-w-xs my-2'>
-                  <div className='label'>
-                    <span className='label-text'>Gender:</span>
-                  </div>
-                  <select
-                    defaultValue={gender || 'Select Gender'}
-                    className='select'
-                    onChange={(e) => setGender(e.target.value)}
-                  >
-                    <option disabled={true}>Select Gender</option>
-                    <option value={'male'}>Male</option>
-                    <option value={'female'}>Female</option>
-                    <option value={'others'}>Other</option>
-                  </select>
-                </label>
-                <label className='form-control w-full max-w-xs my-2'>
-                  <div className='label'>
-                    <span className='label-text'>About:</span>
-                  </div>
-                  <textarea
-                    className='textarea'
-                    placeholder='Bio'
-                    value={about}
-                    onChange={(e) => setAbout(e.target.value)}
-                  ></textarea>
-                  {/* <textarea
-                    value={about}
-                    className='input input-bordered w-full max-w-xs'
-                    onChange={(e) => setAbout(e.target.value)}
-                  /> */}
-                </label>
+    <div className='flex-1 max-w-6xl w-full mx-auto px-4 py-8 space-y-8'>
+      {/* Header & Completion Status */}
+      <div className='space-y-3'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+          <div>
+            <h1 className='text-2xl sm:text-3xl font-black text-base-content'>Profile Settings</h1>
+            <p className='text-xs opacity-70'>
+              Manage your roommate preferences, lifestyle habits, and discoverability.
+            </p>
+          </div>
+
+          <div className='flex items-center gap-3 bg-base-200 p-2.5 px-4 rounded-2xl border border-base-300 shadow-xs'>
+            <div className='text-right'>
+              <div className='text-[11px] font-bold uppercase tracking-wider opacity-60'>
+                Profile Status
               </div>
-              <p className='text-red-500'>{error}</p>
-              <div className='card-actions justify-center m-2'>
-                <button className='btn btn-primary' onClick={saveProfile}>
-                  Save Profile
-                </button>
-              </div>
+              {loading ? (
+                <div className='text-xs font-extrabold text-primary'>Calculating...</div>
+              ) : (
+                <div className='text-xs font-extrabold text-primary'>
+                  {completionPercentage}% Completed
+                </div>
+              )}
             </div>
+            {loading ? (
+              <progress className='progress progress-primary w-24'></progress>
+            ) : (
+              <progress
+                className='progress progress-primary w-24'
+                value={completionPercentage}
+                max='100'
+              ></progress>
+            )}
           </div>
         </div>
-        <UserCard user={{ firstName, lastName, photoUrl, age, gender, about }} />
+
+        {/* Section Navigation Tabs */}
+        <div className='flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none'>
+          {SECTIONS.map((sec) => {
+            const isActive = activeSection === sec.id;
+            return (
+              <button
+                key={sec.id}
+                onClick={() => setActiveSection(sec.id)}
+                className={`btn btn-sm rounded-xl font-bold flex items-center gap-1.5 shrink-0 transition-all ${
+                  isActive
+                    ? 'btn-primary shadow-md'
+                    : 'btn-ghost bg-base-200/80 text-base-content opacity-75 hover:opacity-100'
+                }`}
+              >
+                <span>{sec.icon}</span>
+                <span>{sec.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-      {showToast && (
-        <div className='toast toast-top toast-center'>
-          <div className='alert alert-success'>
-            <span>Profile saved successfully.</span>
-          </div>
+
+      {/* Main Grid: Form Left, Real-Time Preview Right */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-8 items-start'>
+        {/* Active Form Card */}
+        <div className='lg:col-span-7 card bg-base-100 border border-base-300 shadow-xl rounded-3xl p-6 sm:p-7'>
+          {renderActiveSectionForm()}
         </div>
-      )}
-    </>
+
+        {/* Live Card Preview Column */}
+        <div className='lg:col-span-5 flex flex-col items-center space-y-3 sticky top-24'>
+          <div className='flex items-center justify-between w-full max-w-sm px-1'>
+            <span className='text-xs font-bold uppercase tracking-wider opacity-60'>
+              Live Roommate Preview
+            </span>
+            <span className='badge badge-xs badge-success text-white font-semibold'>
+              Real-Time Feed Card
+            </span>
+          </div>
+
+          <UserCard user={livePreviewUser} isPreview={true} />
+        </div>
+      </div>
+    </div>
   );
 };
+
 export default EditProfile;
