@@ -86,7 +86,12 @@ function LocationForm({ user, onUpdateLivePreview }) {
     const address = place.address || {};
 
     const detectedCity =
-      address.city || address.town || address.village || address.county || address.state_district || '';
+      address.city ||
+      address.town ||
+      address.village ||
+      address.county ||
+      address.state_district ||
+      '';
     const detectedArea =
       address.suburb || address.neighbourhood || address.residential || address.road || '';
     const detectedState = address.state || '';
@@ -207,7 +212,9 @@ function LocationForm({ user, onUpdateLivePreview }) {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || 'Failed to save location');
+      setError(
+        err?.response?.data?.error || err?.response?.data?.message || 'Failed to save location',
+      );
     } finally {
       setSaving(false);
     }
@@ -279,7 +286,7 @@ function LocationForm({ user, onUpdateLivePreview }) {
 
           {/* Search suggestions dropdown */}
           {searchResults.length > 0 && (
-            <ul className='absolute z-50 mt-1 w-full bg-base-100 rounded-xl shadow-xl border border-base-300 max-h-52 overflow-y-auto divide-y divide-base-200 text-xs'>
+            <ul className='absolute z-50 mt-1 w-full bg-base-100 rounded-xl shadow-xl border border-base-300 max-h-52 overflow-y-auto divide-y text-xs'>
               {searchResults.map((result, idx) => (
                 <li
                   key={idx}
@@ -447,11 +454,7 @@ function LocationForm({ user, onUpdateLivePreview }) {
           disabled={saving}
           className='btn btn-primary btn-sm rounded-xl font-bold px-6 shadow-md shadow-primary/20'
         >
-          {saving ? (
-            <span className='loading loading-spinner loading-xs'></span>
-          ) : (
-            'Save Location'
-          )}
+          {saving ? <span className='loading loading-spinner loading-xs'></span> : 'Save Location'}
         </button>
       </div>
     </form>

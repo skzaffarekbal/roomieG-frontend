@@ -26,7 +26,7 @@ export const formatLanguages = (languages) => {
 /**
  * Safely format lifestyle field values whether they are strings, booleans, or nested objects like { hasPets, petFriendly }
  */
-export const formatLifestyleValue = (val) => {
+export const formatLifestyleValue = (val, key = null) => {
   if (val === null || val === undefined || val === '') return '';
   if (typeof val === 'number') return `${val}/5`;
   if (typeof val === 'boolean') return val ? 'Yes' : 'No';
@@ -44,23 +44,37 @@ export const formatLifestyleValue = (val) => {
   }
 
   const map = {
-    never: 'Never',
-    occasionally: 'Occasionally',
-    regularly: 'Regularly',
-    frequently: 'Frequently',
-    quiet: 'Quiet',
-    early_bird: 'Early Bird (10 PM - 5 AM)',
-    normal: 'Normal (12 PM - 7 AM)',
-    night_owl: 'Night Owl (2 AM - 10 AM)',
-    vegetarian: 'Vegetarian',
-    non_vegetarian: 'Non-Vegetarian',
-    eggetarian: 'Eggetarian',
-    vegan: 'Vegan',
-    flexible: 'Flexible',
-    office: 'Work From Office',
-    hybrid: 'Hybrid',
-    remote: 'Work From Home',
-    student: 'Student',
+    never:
+      'Never' +
+      ' ' +
+      (key === 'smoking' ? '🚭' : key === 'drinking' ? '🍻' : key === 'guests' ? '👥' : ''),
+    occasionally:
+      'Occasionally' +
+      ' ' +
+      (key === 'smoking'
+        ? '🚬'
+        : key === 'drinking'
+          ? '🍻'
+          : key === 'guests'
+            ? '👥'
+            : key === 'music'
+              ? '🎶'
+              : ''),
+    regularly: 'Regularly' + ' ' + (key === 'smoking' ? '🚬' : key === 'drinking' ? '🍻' : ''),
+    frequently: 'Frequently' + ' ' + (key === 'guests' ? '👥' : key === 'music' ? '🎶' : ''),
+    quiet: 'Quiet 🎧',
+    early_bird: 'Early Bird 🛌 (10 - 5)',
+    normal: 'Normal 🛌 (12 - 7)',
+    night_owl: 'Night Owl 🛌 (2 - 10)',
+    vegetarian: 'Vegetarian 🥗',
+    non_vegetarian: 'Non-Vegetarian 🥩',
+    eggetarian: 'Eggetarian 🥚',
+    vegan: 'Vegan 🥬',
+    flexible: 'Flexible 🍱',
+    office: 'WFO 🏢',
+    hybrid: 'Hybrid 💻',
+    remote: 'WFH 🏡',
+    student: 'Student 👨‍🎓',
   };
 
   return map[val] || String(val);

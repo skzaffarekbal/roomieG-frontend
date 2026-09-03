@@ -68,14 +68,24 @@ const UserCard = ({ user, isPreview = false }) => {
   // Safe formatted lifestyle chips
   const sleepStr = lifestyle ? formatLifestyleValue(lifestyle.sleepSchedule) : '';
   const foodStr = lifestyle ? formatLifestyleValue(lifestyle.foodPreference) : '';
-  const workStr = lifestyle ? formatLifestyleValue(lifestyle.workMode) : '';
+  const workStr = lifestyle ? formatLifestyleValue(lifestyle.workMode, 'workMode') : '';
   const cleanStr = lifestyle ? formatLifestyleValue(lifestyle.cleanliness) : '';
   const petsStr = lifestyle ? formatLifestyleValue(lifestyle.pets) : '';
-  const smokeStr = lifestyle ? formatLifestyleValue(lifestyle.smoking) : '';
-  const drinkStr = lifestyle ? formatLifestyleValue(lifestyle.drinking) : '';
+  const smokeStr = lifestyle ? formatLifestyleValue(lifestyle.smoking, 'smoking') : '';
+  const drinkStr = lifestyle ? formatLifestyleValue(lifestyle.drinking, 'drinking') : '';
+  const musicStr = lifestyle ? formatLifestyleValue(lifestyle.music, 'music') : '';
+  const guestsStr = lifestyle ? formatLifestyleValue(lifestyle.guests, 'guests') : '';
 
   const hasAnyLifestyle = Boolean(
-    sleepStr || foodStr || workStr || cleanStr || petsStr || smokeStr || drinkStr,
+    sleepStr ||
+    foodStr ||
+    workStr ||
+    cleanStr ||
+    petsStr ||
+    smokeStr ||
+    drinkStr ||
+    musicStr ||
+    guestsStr,
   );
 
   return (
@@ -129,13 +139,51 @@ const UserCard = ({ user, isPreview = false }) => {
               Lifestyle & Habits
             </div>
             <div className='flex flex-wrap gap-1 text-[11px]'>
-              {sleepStr && <span className='badge badge-xs badge-neutral'>{sleepStr}</span>}
-              {foodStr && <span className='badge badge-xs badge-neutral'>{foodStr}</span>}
-              {workStr && <span className='badge badge-xs badge-neutral'>{workStr}</span>}
-              {cleanStr && <span className='badge badge-xs badge-neutral'>Clean: {cleanStr}</span>}
-              {petsStr && <span className='badge badge-xs badge-neutral'>{petsStr}</span>}
-              {smokeStr && <span className='badge badge-xs badge-neutral'>{smokeStr}</span>}
-              {drinkStr && <span className='badge badge-xs badge-neutral'>{drinkStr}</span>}
+              {sleepStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {sleepStr}
+                </span>
+              )}
+              {foodStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {foodStr}
+                </span>
+              )}
+              {workStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {workStr}
+                </span>
+              )}
+              {cleanStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  Clean: {cleanStr}
+                </span>
+              )}
+              {petsStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {petsStr}
+                </span>
+              )}
+              {smokeStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {smokeStr}
+                </span>
+              )}
+              {drinkStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {drinkStr}
+                </span>
+              )}
+              {musicStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {musicStr}
+                </span>
+              )}
+              {guestsStr && (
+                <span className='badge badge-xs badge-soft badge-primary text-base-content'>
+                  {guestsStr}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -144,16 +192,20 @@ const UserCard = ({ user, isPreview = false }) => {
         {housing && typeof housing === 'object' && (
           <div className='pt-1 flex items-center justify-between text-xs bg-base-200/70 p-2.5 rounded-xl'>
             <span className='opacity-70 capitalize'>
-              {housing.roomType ? `${housing.roomType} room` : housing.status ? housing.status.replace(/_/g, ' ') : 'Room'}
+              {housing.roomType
+                ? `${housing.roomType} room`
+                : housing.status
+                  ? housing.status.replace(/_/g, ' ')
+                  : 'Room'}
             </span>
             <span className='font-bold text-primary'>
               {housing.budget?.max
                 ? `₹${Number(housing.budget.min || 0).toLocaleString()} - ₹${Number(housing.budget.max).toLocaleString()}/mo`
                 : housing.room?.rent
-                ? `₹${Number(housing.room.rent).toLocaleString()}/mo`
-                : typeof housing.budget === 'number'
-                ? `₹${Number(housing.budget).toLocaleString()}/mo`
-                : ''}
+                  ? `₹${Number(housing.room.rent).toLocaleString()}/mo`
+                  : typeof housing.budget === 'number'
+                    ? `₹${Number(housing.budget).toLocaleString()}/mo`
+                    : ''}
             </span>
           </div>
         )}
