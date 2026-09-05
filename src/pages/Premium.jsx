@@ -10,19 +10,20 @@ function Premium() {
   const [showToast, setShowToast] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const expiresAt = loginUser?.subscription?.expiresAt;
+  const expiresAt = loginUser?.subscription?.expiresAt
+    ? new Date(loginUser?.subscription?.expiresAt).getTime()
+    : null;
   const currentTime = new Date().getTime();
-  const plan = loginUser?.subscription?.plan;
-  const isPremium = expiresAt > currentTime && plan !== 'free';
+  const currentPlan = loginUser?.subscription?.plan;
+  const isPremium = expiresAt > currentTime && currentPlan !== 'free';
+
+  const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
+  const onlyFiveDaysLeft = expiresAt - currentTime > 0 && expiresAt - currentTime < FIVE_DAYS_IN_MS;
 
   const verifyPremiumUser = async () => {
     try {
       const res = await verifyPremiumApi();
-      const expiresAt = res?.data?.subscription?.expiresAt;
-      const currentTime = new Date().getTime();
-      const plan = res?.data?.subscription?.plan;
-      const isPremium = expiresAt > currentTime && plan !== 'free';
-      if (isPremium) {
+      if (res?.data) {
         dispatch(addUser(res?.data));
       }
     } catch (error) {
@@ -31,7 +32,7 @@ function Premium() {
   };
 
   const handleBuy = async (plan) => {
-    if (isPremium) {
+    if (isPremium && !(onlyFiveDaysLeft && plan === currentPlan)) {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -174,7 +175,11 @@ function Premium() {
               disabled={isProcessing}
               onClick={() => handleBuy('silver')}
             >
-              {isPremium && plan === 'silver' ? 'Active Plan ✓' : 'Get Silver Plan'}
+              {isPremium && currentPlan === 'silver'
+                ? onlyFiveDaysLeft
+                  ? 'Renew Plan'
+                  : 'Active Plan ✓'
+                : 'Get Silver Plan'}
             </button>
           </div>
         </div>
@@ -224,7 +229,11 @@ function Premium() {
               disabled={isProcessing}
               onClick={() => handleBuy('gold')}
             >
-              {isPremium && plan === 'gold' ? 'Active Plan ✓' : 'Get Gold VIP'}
+              {isPremium && currentPlan === 'gold'
+                ? onlyFiveDaysLeft
+                  ? 'Renew Plan'
+                  : 'Active Plan ✓'
+                : 'Get Gold VIP'}
             </button>
           </div>
         </div>
@@ -233,7 +242,9 @@ function Premium() {
       {showToast && (
         <div className='toast toast-top toast-center z-50'>
           <div className='alert alert-success text-white font-semibold text-xs shadow-lg'>
-            <span>You already have active {plan === 'gold' ? 'Gold' : 'Silver'} Premium.</span>
+            <span>
+              You already have active {currentPlan === 'gold' ? 'Gold' : 'Silver'} Premium.
+            </span>
           </div>
         </div>
       )}

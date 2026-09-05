@@ -36,10 +36,14 @@ function NavBar() {
     return (user.firstName[0] + (user.lastName ? user.lastName[0] : '')).toUpperCase();
   };
 
-  const expiresAt = user?.subscription?.expiresAt;
+  const expiresAt = user?.subscription?.expiresAt
+    ? new Date(user?.subscription?.expiresAt).getTime()
+    : null;
   const currentTime = new Date().getTime();
   const plan = user?.subscription?.plan;
   const isPremium = expiresAt > currentTime && plan !== 'free';
+
+  const daysLeft = Math.floor((expiresAt - currentTime) / (24 * 60 * 60 * 1000));
 
   return (
     <header className='sticky top-0 z-40 backdrop-blur-md bg-base-100/90 border-b border-base-300 shadow-xs'>
@@ -162,7 +166,11 @@ function NavBar() {
                               : 'badge-ghost'
                           }`}
                         >
-                          {isPremium ? (plan === 'gold' ? 'Gold' : 'Silver') : 'Free'}
+                          {isPremium
+                            ? plan === 'gold'
+                              ? `${daysLeft > 5 ? daysLeft + ' Days Gold' : 'Renew Gold'}`
+                              : `${daysLeft > 5 ? daysLeft + ' Days Silver' : 'Renew Silver'}`
+                            : 'Free'}
                         </span>
                       </Link>
                     </li>
