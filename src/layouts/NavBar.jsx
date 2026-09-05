@@ -36,6 +36,11 @@ function NavBar() {
     return (user.firstName[0] + (user.lastName ? user.lastName[0] : '')).toUpperCase();
   };
 
+  const expiresAt = user?.subscription?.expiresAt;
+  const currentTime = new Date().getTime();
+  const plan = user?.subscription?.plan;
+  const isPremium = expiresAt > currentTime && plan !== 'free';
+
   return (
     <header className='sticky top-0 z-40 backdrop-blur-md bg-base-100/90 border-b border-base-300 shadow-xs'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -150,18 +155,14 @@ function NavBar() {
                         <span>👑 Membership</span>
                         <span
                           className={`badge badge-xs font-semibold ${
-                            user?.isPremium
-                              ? user?.membershipType === 'gold'
+                            isPremium
+                              ? plan === 'gold'
                                 ? 'badge-warning text-white'
                                 : 'bg-slate-400 text-white'
                               : 'badge-ghost'
                           }`}
                         >
-                          {user?.isPremium
-                            ? user?.membershipType === 'gold'
-                              ? 'Gold'
-                              : 'Silver'
-                            : 'Free'}
+                          {isPremium ? (plan === 'gold' ? 'Gold' : 'Silver') : 'Free'}
                         </span>
                       </Link>
                     </li>
