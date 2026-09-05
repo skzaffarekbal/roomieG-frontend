@@ -10,10 +10,19 @@ function Premium() {
   const [showToast, setShowToast] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const expiresAt = loginUser?.subscription?.expiresAt;
+  const currentTime = new Date().getTime();
+  const plan = loginUser?.subscription?.plan;
+  const isPremium = expiresAt > currentTime && plan !== 'free';
+
   const verifyPremiumUser = async () => {
     try {
       const res = await verifyPremiumApi();
-      if (res?.data?.isPremium) {
+      const expiresAt = res?.data?.subscription?.expiresAt;
+      const currentTime = new Date().getTime();
+      const plan = res?.data?.subscription?.plan;
+      const isPremium = expiresAt > currentTime && plan !== 'free';
+      if (isPremium) {
         dispatch(addUser(res?.data));
       }
     } catch (error) {
@@ -21,8 +30,8 @@ function Premium() {
     }
   };
 
-  const handleBuy = async (membershipType) => {
-    if (loginUser?.isPremium) {
+  const handleBuy = async (plan) => {
+    if (isPremium) {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -31,7 +40,7 @@ function Premium() {
     }
     try {
       setIsProcessing(true);
-      const order = await createPaymentOrderApi(membershipType);
+      const order = await createPaymentOrderApi(plan);
 
       const { amount, keyId, currency, notes, orderId } = order;
       const options = {
@@ -49,7 +58,7 @@ function Premium() {
           contact: '9999999999',
         },
         theme: {
-          color: membershipType === 'gold' ? '#D4AF37' : '#C0C0C0',
+          color: plan === 'gold' ? '#D4AF37' : '#C0C0C0',
         },
         handler: () => {
           verifyPremiumUser();
@@ -116,7 +125,7 @@ function Premium() {
           </div>
           <div className='pt-8'>
             <button className='btn btn-outline btn-block rounded-2xl font-bold' disabled>
-              {loginUser?.isPremium ? 'Free Tier' : 'Current Plan'}
+              {isPremium ? 'Free Tier' : 'Current Plan'}
             </button>
           </div>
         </div>
@@ -165,9 +174,7 @@ function Premium() {
               disabled={isProcessing}
               onClick={() => handleBuy('silver')}
             >
-              {loginUser?.isPremium && loginUser?.membershipType === 'silver'
-                ? 'Active Plan ✓'
-                : 'Get Silver Plan'}
+              {isPremium && plan === 'silver' ? 'Active Plan ✓' : 'Get Silver Plan'}
             </button>
           </div>
         </div>
@@ -217,9 +224,7 @@ function Premium() {
               disabled={isProcessing}
               onClick={() => handleBuy('gold')}
             >
-              {loginUser?.isPremium && loginUser?.membershipType === 'gold'
-                ? 'Active Plan ✓'
-                : 'Get Gold VIP'}
+              {isPremium && plan === 'gold' ? 'Active Plan ✓' : 'Get Gold VIP'}
             </button>
           </div>
         </div>
@@ -228,10 +233,7 @@ function Premium() {
       {showToast && (
         <div className='toast toast-top toast-center z-50'>
           <div className='alert alert-success text-white font-semibold text-xs shadow-lg'>
-            <span>
-              You already have active {loginUser?.membershipType === 'gold' ? 'Gold' : 'Silver'}{' '}
-              Premium.
-            </span>
+            <span>You already have active {plan === 'gold' ? 'Gold' : 'Silver'} Premium.</span>
           </div>
         </div>
       )}
