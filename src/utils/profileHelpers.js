@@ -79,3 +79,38 @@ export const formatLifestyleValue = (val, key = null) => {
 
   return map[val] || String(val);
 };
+
+/**
+ * Calculates current subscription state, plan, and days remaining
+ */
+export const getSubscriptionInfo = (subscription) => {
+  if (!subscription) {
+    return {
+      isPremium: false,
+      plan: 'free',
+      daysLeft: 0,
+      isExpiringSoon: false,
+      expiresAt: null,
+    };
+  }
+
+  const expiresAt = subscription?.expiresAt
+    ? new Date(subscription.expiresAt).getTime()
+    : null;
+  const currentTime = new Date().getTime();
+  const plan = subscription?.plan || 'free';
+  const isPremium = Boolean(expiresAt && expiresAt > currentTime && plan !== 'free');
+  const daysLeft =
+    expiresAt && isPremium ? Math.floor((expiresAt - currentTime) / (24 * 60 * 60 * 1000)) : 0;
+  const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
+  const isExpiringSoon =
+    isPremium && expiresAt - currentTime > 0 && expiresAt - currentTime < FIVE_DAYS_IN_MS;
+
+  return {
+    isPremium,
+    plan,
+    expiresAt,
+    daysLeft,
+    isExpiringSoon,
+  };
+};

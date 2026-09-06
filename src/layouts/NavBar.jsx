@@ -5,10 +5,12 @@ import { logoutApi } from '../api/authApi';
 import Cookies from 'js-cookie';
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { getSubscriptionInfo } from '../utils/profileHelpers';
 import SunIcon from '../assets/icon/SunIcon';
 import MoonIcon from '../assets/icon/MoonIcon';
 import SettingIcon from '../assets/icon/SettingIcon';
 import ChatIcon from '../assets/icon/ChatIcon';
+import PremiumBadge from '../components/PremiumBadge';
 
 function NavBar() {
   const [token, setToken] = useState(Cookies.get('token'));
@@ -36,14 +38,7 @@ function NavBar() {
     return (user.firstName[0] + (user.lastName ? user.lastName[0] : '')).toUpperCase();
   };
 
-  const expiresAt = user?.subscription?.expiresAt
-    ? new Date(user?.subscription?.expiresAt).getTime()
-    : null;
-  const currentTime = new Date().getTime();
-  const plan = user?.subscription?.plan;
-  const isPremium = expiresAt > currentTime && plan !== 'free';
-
-  const daysLeft = Math.floor((expiresAt - currentTime) / (24 * 60 * 60 * 1000));
+  const { isPremium, plan, daysLeft } = getSubscriptionInfo(user?.subscription);
 
   return (
     <header className='sticky top-0 z-40 backdrop-blur-md bg-base-100/90 border-b border-base-300 shadow-xs'>
@@ -110,7 +105,9 @@ function NavBar() {
                 {/* User Avatar Dropdown */}
                 <div className='dropdown dropdown-end'>
                   <div tabIndex={0} role='button' className='btn btn-ghost btn-circle avatar'>
-                    <div className='w-9 sm:w-10 rounded-full ring-2 ring-primary/40 ring-offset-2 ring-offset-base-100 overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold'>
+                    <div
+                      className={`w-9 sm:w-10 rounded-full ring-2 ${isPremium ? (plan === 'gold' ? 'ring-amber-500/50' : 'ring-slate-400/50') : 'ring-primary/40'} ring-offset-2 ring-offset-base-100 overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold`}
+                    >
                       {user?.photo?.exactPhoto ? (
                         <img
                           alt={user?.firstName || 'User'}
@@ -135,8 +132,9 @@ function NavBar() {
                       <div className='text-[10px] opacity-70 truncate'>{user?.emailId}</div>
                     </li>
                     <li>
-                      <Link to='/profile' className='py-2'>
-                        👤 Profile
+                      <Link to='/profile' className='py-2 flex justify-between'>
+                        <span>👤 Profile</span>
+                        <PremiumBadge subscription={user?.subscription} size='xs' />
                       </Link>
                     </li>
                     <li>

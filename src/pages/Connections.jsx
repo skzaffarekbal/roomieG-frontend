@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addConnection } from '../redux/connectionSlice';
 import { Link } from 'react-router-dom';
 import { getConnectionsApi } from '../api/connectionApi';
+import PremiumBadge from '../components/PremiumBadge';
 
 function Connections() {
   const connection = useSelector((state) => state.connection);
@@ -54,7 +55,7 @@ function Connections() {
 
       <div className='space-y-4'>
         {connection.map((conn) => {
-          const { _id, firstName, lastName, photo, age, gender, bio } = conn;
+          const { _id, firstName, lastName, photo, age, gender, bio, subscription } = conn;
           const unread = userWiseUnreadCounts[_id] || 0;
 
           return (
@@ -87,6 +88,7 @@ function Connections() {
                     <h2 className='font-bold text-base sm:text-lg text-base-content truncate'>
                       {firstName} {lastName}
                     </h2>
+                    <PremiumBadge subscription={subscription} size='xs' />
                     {gender && (
                       <span className='badge badge-xs badge-outline capitalize opacity-75'>
                         {gender} {age ? `• ${age}` : ''}
