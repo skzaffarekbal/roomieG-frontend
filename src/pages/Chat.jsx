@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { format } from 'date-fns';
 import { resetUnreadCount } from '../redux/unreadCountSlice';
 import { getTargetUserProfileApi } from '../api/feedApi';
+import PremiumBadge from '../components/PremiumBadge';
 
 function Chat() {
   const { targetUserId } = useParams();
@@ -188,11 +189,14 @@ function Chat() {
               </div>
             </div>
             <div>
-              <h3 className='font-bold text-base-content text-sm sm:text-base leading-tight'>
-                {targetUser
-                  ? `${targetUser.firstName} ${targetUser.lastName || ''}`
-                  : 'Connecting...'}
-              </h3>
+              <div className='flex items-center gap-1.5 flex-wrap'>
+                <h3 className='font-bold text-base-content text-sm sm:text-base leading-tight'>
+                  {targetUser
+                    ? `${targetUser.firstName} ${targetUser.lastName || ''}`
+                    : 'Connecting...'}
+                </h3>
+                <PremiumBadge subscription={targetUser?.subscription} size='xs' />
+              </div>
               <p className='text-[11px] opacity-70 text-success font-medium'>Online • Live Chat</p>
             </div>
           </div>

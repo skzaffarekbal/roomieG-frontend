@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import UserCard from './UserCard';
+import PremiumBadge from './PremiumBadge';
 import BasicProfileForm from './profile/BasicProfileForm';
 import OccupationForm from './profile/OccupationForm';
 import LocationForm from './profile/LocationForm';
@@ -82,8 +84,15 @@ const EditProfile = ({ user }) => {
       <div className='space-y-3'>
         <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
           <div>
-            <h1 className='text-2xl sm:text-3xl font-black text-base-content'>Profile Settings</h1>
-            <p className='text-xs opacity-70'>
+            <div className='flex items-center gap-2.5 flex-wrap'>
+              <h1 className='text-2xl sm:text-3xl font-black text-base-content'>
+                Profile Settings
+              </h1>
+              <Link to='/premium' className='hover:opacity-90 transition-opacity'>
+                <PremiumBadge subscription={user?.subscription} size='sm' showDays={true} />
+              </Link>
+            </div>
+            <p className='text-xs opacity-70 mt-0.5'>
               Manage your roommate preferences, lifestyle habits, and discoverability.
             </p>
           </div>

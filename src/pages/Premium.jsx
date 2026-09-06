@@ -3,6 +3,7 @@ import { addUser } from '../redux/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 import { verifyPremiumApi, createPaymentOrderApi } from '../api/paymentApi';
+import { getSubscriptionInfo } from '../utils/profileHelpers';
 
 function Premium() {
   const dispatch = useDispatch();
@@ -10,15 +11,8 @@ function Premium() {
   const [showToast, setShowToast] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const expiresAt = loginUser?.subscription?.expiresAt
-    ? new Date(loginUser?.subscription?.expiresAt).getTime()
-    : null;
-  const currentTime = new Date().getTime();
-  const currentPlan = loginUser?.subscription?.plan;
-  const isPremium = expiresAt > currentTime && currentPlan !== 'free';
-
-  const FIVE_DAYS_IN_MS = 5 * 24 * 60 * 60 * 1000;
-  const onlyFiveDaysLeft = expiresAt - currentTime > 0 && expiresAt - currentTime < FIVE_DAYS_IN_MS;
+  const { isPremium, plan: currentPlan, isExpiringSoon: onlyFiveDaysLeft } =
+    getSubscriptionInfo(loginUser?.subscription);
 
   const verifyPremiumUser = async () => {
     try {

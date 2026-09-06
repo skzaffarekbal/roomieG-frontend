@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { addRequest, removeRequest } from '../redux/requestSlice';
 import { getReceivedRequestsApi, reviewRequestApi } from '../api/requestApi';
 import { Link } from 'react-router-dom';
+import PremiumBadge from '../components/PremiumBadge';
 
 function Requests() {
   const request = useSelector((state) => state.request);
@@ -69,7 +70,7 @@ function Requests() {
       <div className='space-y-4'>
         {request?.map((req) => {
           const fromUser = req.fromUserId || {};
-          const { _id, firstName, lastName, photo, age, gender, bio } = fromUser;
+          const { _id, firstName, lastName, photo, age, gender, bio, subscription } = fromUser;
           const isProcessing = processingId === req._id;
 
           return (
@@ -97,6 +98,7 @@ function Requests() {
                     <h2 className='font-bold text-base sm:text-lg text-base-content'>
                       {firstName} {lastName}
                     </h2>
+                    <PremiumBadge subscription={subscription} size='xs' />
                     {gender && (
                       <span className='badge badge-xs badge-outline capitalize opacity-75'>
                         {gender} {age ? `• ${age} yrs` : ''}

@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { removeUserFromFeed } from '../redux/feedSlice';
 import { sendRequestApi } from '../api/requestApi';
 import { calculateAge, formatLifestyleValue } from '../utils/profileHelpers';
+import PremiumBadge from './PremiumBadge';
 
 const UserCard = ({ user, isPreview = false }) => {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ const UserCard = ({ user, isPreview = false }) => {
     location,
     lifestyle,
     housing,
+    subscription,
   } = user;
 
   const computedAge =
@@ -97,16 +99,24 @@ const UserCard = ({ user, isPreview = false }) => {
           src={displayPhoto}
           alt={`${firstName || 'User'} ${lastName || ''}`}
         />
+        {/* Floating Premium Badge on top right */}
+        {subscription && (
+          <div className='absolute top-3 right-3 z-10'>
+            <PremiumBadge subscription={subscription} size='xs' />
+          </div>
+        )}
         <div className='absolute bottom-0 inset-x-0 bg-linear-to-t from-black/85 via-black/40 to-transparent p-5 text-white'>
           <div className='flex items-center justify-between'>
-            <h2 className='text-2xl font-black tracking-tight'>
-              {firstName || 'First'} {lastName || 'Last'}{' '}
-              {computedAge ? (
-                <span className='font-normal text-lg opacity-90'>• {computedAge}</span>
-              ) : (
-                ''
-              )}
-            </h2>
+            <div className='flex items-center gap-1.5 flex-wrap min-w-0'>
+              <h2 className='text-2xl font-black tracking-tight'>
+                {firstName || 'First'} {lastName || 'Last'}{' '}
+                {computedAge ? (
+                  <span className='font-normal text-lg opacity-90'>• {computedAge}</span>
+                ) : (
+                  ''
+                )}
+              </h2>
+            </div>
             {gender && (
               <span className='badge badge-sm badge-neutral capitalize font-semibold bg-white/20 text-white border-0'>
                 {typeof gender === 'string' ? gender : ''}
