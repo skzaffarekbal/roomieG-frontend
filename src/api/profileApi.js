@@ -59,3 +59,8 @@ export const editProfileApi = async (profileData) => {
   const response = await apiClient.patch('/profile/edit', profileData);
   return response.data;
 };
+
+export const getPresignedUrlApi = async (data) => {
+  const response = await apiClient.post('/get-presigned-url', data);
+  return response.data;
+};
