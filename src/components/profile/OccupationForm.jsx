@@ -38,7 +38,8 @@ function OccupationForm({ user, onUpdateLivePreview }) {
 
       const res = await updateOccupationApi(payload);
       if (res?.data) {
-        dispatch(addUser(res.data));
+        let updatedUser = { ...user, occupation: res.data };
+        dispatch(addUser(updatedUser));
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

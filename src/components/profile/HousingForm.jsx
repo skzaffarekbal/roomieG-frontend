@@ -19,8 +19,8 @@ function HousingForm({ user, onUpdateLivePreview }) {
     houseObj.budget?.max !== undefined
       ? houseObj.budget.max
       : typeof houseObj.budget === 'number'
-      ? houseObj.budget
-      : '',
+        ? houseObj.budget
+        : '',
   );
 
   // Move in date
@@ -33,8 +33,8 @@ function HousingForm({ user, onUpdateLivePreview }) {
   const initialAreas = Array.isArray(houseObj.preferredLocations?.[0]?.areas)
     ? houseObj.preferredLocations[0].areas.join(', ')
     : typeof houseObj.preferredLocations === 'string'
-    ? houseObj.preferredLocations
-    : '';
+      ? houseObj.preferredLocations
+      : '';
 
   const [city, setCity] = useState(initialCity);
   const [areas, setAreas] = useState(initialAreas);
@@ -44,8 +44,8 @@ function HousingForm({ user, onUpdateLivePreview }) {
     houseObj.roomType === 'Private Room'
       ? 'private'
       : houseObj.roomType === 'Shared Room'
-      ? 'shared'
-      : houseObj.roomType || 'any',
+        ? 'shared'
+        : houseObj.roomType || 'any',
   );
   const [furnished, setFurnished] = useState(
     houseObj.furnished !== undefined ? Boolean(houseObj.furnished) : true,
@@ -156,12 +156,15 @@ function HousingForm({ user, onUpdateLivePreview }) {
 
       const res = await updateHousingApi(payload);
       if (res?.data) {
-        dispatch(addUser(res.data));
+        let updatedUser = { ...user, housing: res.data };
+        dispatch(addUser(updatedUser));
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || 'Failed to save housing info');
+      setError(
+        err?.response?.data?.error || err?.response?.data?.message || 'Failed to save housing info',
+      );
     } finally {
       setSaving(false);
     }
