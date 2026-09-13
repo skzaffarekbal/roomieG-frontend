@@ -207,7 +207,8 @@ function LocationForm({ user, onUpdateLivePreview }) {
 
       const res = await updateLocationApi(payload);
       if (res?.data) {
-        dispatch(addUser(res.data));
+        let updatedUser = { ...user, location: res.data };
+        dispatch(addUser(updatedUser));
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

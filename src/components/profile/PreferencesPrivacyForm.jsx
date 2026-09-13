@@ -6,7 +6,8 @@ import { updatePreferencesApi, updatePrivacyApi } from '../../api/profileApi';
 function PreferencesPrivacyForm({ user }) {
   const dispatch = useDispatch();
 
-  const prefObj = typeof user?.preferences === 'object' && user?.preferences !== null ? user.preferences : {};
+  const prefObj =
+    typeof user?.preferences === 'object' && user?.preferences !== null ? user.preferences : {};
   const privObj = typeof user?.privacy === 'object' && user?.privacy !== null ? user.privacy : {};
 
   const [notifications, setNotifications] = useState(
@@ -33,7 +34,14 @@ function PreferencesPrivacyForm({ user }) {
       ]);
 
       if (privRes?.data || prefRes?.data) {
-        dispatch(addUser(privRes?.data || prefRes?.data));
+        let updatedUser = { ...user };
+        if (prefRes?.data) {
+          updatedUser.preferences = prefRes.data;
+        }
+        if (privRes?.data) {
+          updatedUser.privacy = privRes.data;
+        }
+        dispatch(addUser(updatedUser));
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);

@@ -80,7 +80,8 @@ function LifestyleForm({ user, onUpdateLivePreview }) {
 
       const res = await updateLifestyleApi(payload);
       if (res?.data) {
-        dispatch(addUser(res.data));
+        let updatedUser = { ...user, lifestyle: res.data };
+        dispatch(addUser(updatedUser));
       }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
