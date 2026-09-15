@@ -19,6 +19,7 @@ function Body() {
 
   const isPublicPath = ['/', '/landing', '/login'].includes(location.pathname);
   const userId = userData?._id;
+  const notificationPreference = userData?.preferences?.notifications;
 
   const fetchUser = useCallback(async () => {
     if (userData) return;
@@ -60,14 +61,16 @@ function Body() {
 
     socket.on('unreadCountUpdate', (data) => {
       dispatch(incrementUnreadCount(data.senderId));
-      const audio = new Audio('/bell.mp3');
-      audio.play().catch((err) => console.log(err));
+      if (notificationPreference) {
+        const audio = new Audio('/bell.mp3');
+        audio.play().catch((err) => console.log(err));
+      }
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [userId, fetchUnreadCounts, dispatch]);
+  }, [userId, fetchUnreadCounts, dispatch, notificationPreference]);
 
   return (
     <div className='flex flex-col min-h-screen bg-base-100 text-base-content selection:bg-primary selection:text-primary-content'>
