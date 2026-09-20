@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addUser } from '../../redux/userSlice';
 import { updateBasicProfileApi } from '../../api/profileApi';
 import { calculateAge } from '../../utils/profileHelpers';
+import EmailVerificationBadge from '../EmailVerificationBadge';
 
 function BasicProfileForm({ user, onUpdateLivePreview }) {
   const dispatch = useDispatch();
@@ -76,6 +77,35 @@ function BasicProfileForm({ user, onUpdateLivePreview }) {
           <span className='badge badge-success text-white badge-sm font-semibold animate-pulse'>
             Saved ✓
           </span>
+        )}
+      </div>
+
+      {/* Registered Email & Verification Status */}
+      <div className='form-control bg-base-200/40 p-3 rounded-2xl border border-base-300 space-y-2'>
+        <div className='flex items-center justify-between flex-wrap gap-2'>
+          <label className='label py-0 text-xs font-semibold'>
+            <span>Account Email</span>
+          </label>
+          <EmailVerificationBadge
+            isVerified={user?.isEmailVerified}
+            email={user?.emailId}
+            size='sm'
+          />
+        </div>
+        <div className='flex items-center gap-2'>
+          <input
+            type='email'
+            readOnly
+            disabled
+            value={user?.emailId || ''}
+            className='input input-bordered input-sm rounded-xl bg-base-200/80 text-xs font-medium w-full opacity-80 cursor-not-allowed'
+          />
+        </div>
+        {!user?.isEmailVerified && (
+          <p className='text-[11px] text-warning flex items-center gap-1.5 font-medium'>
+            <span>✉️</span>
+            <span>Please check your inbox at <span className='font-bold underline'>{user?.emailId || 'registered email'}</span> to complete verification.</span>
+          </p>
         )}
       </div>
 
