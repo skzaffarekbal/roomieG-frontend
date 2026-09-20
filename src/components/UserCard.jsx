@@ -4,6 +4,7 @@ import { removeUserFromFeed } from '../redux/feedSlice';
 import { sendRequestApi } from '../api/requestApi';
 import { calculateAge, formatLifestyleValue } from '../utils/profileHelpers';
 import PremiumBadge from './PremiumBadge';
+import EmailVerificationBadge from './EmailVerificationBadge';
 
 const UserCard = ({ user, isPreview = false }) => {
   const dispatch = useDispatch();
@@ -25,6 +26,8 @@ const UserCard = ({ user, isPreview = false }) => {
     lifestyle,
     housing,
     subscription,
+    isEmailVerified,
+    emailId,
   } = user;
 
   const computedAge =
@@ -108,13 +111,22 @@ const UserCard = ({ user, isPreview = false }) => {
         <div className='absolute bottom-0 inset-x-0 bg-linear-to-t from-black/85 via-black/40 to-transparent p-5 text-white'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center gap-1.5 flex-wrap min-w-0'>
-              <h2 className='text-2xl font-black tracking-tight'>
-                {firstName || 'First'} {lastName || 'Last'}{' '}
-                {computedAge ? (
-                  <span className='font-normal text-lg opacity-90'>• {computedAge}</span>
-                ) : (
-                  ''
-                )}
+              <h2 className='text-2xl font-black tracking-tight flex items-center gap-2'>
+                <span>
+                  {firstName || 'First'} {lastName || 'Last'}{' '}
+                  {computedAge ? (
+                    <span className='font-normal text-lg opacity-90'>• {computedAge}</span>
+                  ) : (
+                    ''
+                  )}
+                </span>
+                <EmailVerificationBadge
+                  isVerified={isEmailVerified}
+                  email={emailId}
+                  size='xs'
+                  showIconOnly={false}
+                  showTooltip={false}
+                />
               </h2>
             </div>
             {gender && (

@@ -11,6 +11,7 @@ import MoonIcon from '../assets/icon/MoonIcon';
 import SettingIcon from '../assets/icon/SettingIcon';
 import ChatIcon from '../assets/icon/ChatIcon';
 import PremiumBadge from '../components/PremiumBadge';
+import EmailVerificationBadge from '../components/EmailVerificationBadge';
 
 function NavBar() {
   const [token, setToken] = useState(Cookies.get('token'));
@@ -129,7 +130,15 @@ function NavBar() {
                           ? `${user.firstName} ${user.lastName || ''}`
                           : 'My Account'}
                       </div>
-                      <div className='text-[10px] opacity-70 truncate'>{user?.emailId}</div>
+                      <div className='flex items-center justify-between gap-1 mt-0.5'>
+                        <span className='text-[10px] opacity-70 truncate'>{user?.emailId}</span>
+                        <EmailVerificationBadge
+                          isVerified={user?.isEmailVerified}
+                          email={user?.emailId}
+                          size='xs'
+                          showIconOnly={true}
+                        />
+                      </div>
                     </li>
                     <li>
                       <Link to='/profile' className='py-2 flex justify-between'>

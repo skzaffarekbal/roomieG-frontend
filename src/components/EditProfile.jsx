@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import UserCard from './UserCard';
 import PremiumBadge from './PremiumBadge';
+import EmailVerificationBadge from './EmailVerificationBadge';
 import BasicProfileForm from './profile/BasicProfileForm';
 import OccupationForm from './profile/OccupationForm';
 import LocationForm from './profile/LocationForm';
@@ -91,6 +92,12 @@ const EditProfile = ({ user }) => {
               <Link to='/premium' className='hover:opacity-90 transition-opacity'>
                 <PremiumBadge subscription={user?.subscription} size='sm' showDays={true} />
               </Link>
+              <EmailVerificationBadge
+                isVerified={user?.isEmailVerified}
+                email={user?.emailId}
+                size='sm'
+                showTooltip={false}
+              />
             </div>
             <p className='text-xs opacity-70 mt-0.5'>
               Manage your roommate preferences, lifestyle habits, and discoverability.
