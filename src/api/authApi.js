@@ -19,3 +19,8 @@ export const logoutApi = async () => {
   const response = await apiClient.post('/logout', {});
   return response.data;
 };
+
+export const resendVerificationMailApi = async ({ emailId }) => {
+  const response = await apiClient.post('/resend-verification-mail', { emailId });
+  return response.data;
+};
