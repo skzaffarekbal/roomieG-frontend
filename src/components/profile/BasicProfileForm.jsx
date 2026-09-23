@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../../redux/userSlice';
-import { updateBasicProfileApi } from '../../api/profileApi';
+import { updateBasicProfileApi, viewProfileApi } from '../../api/profileApi';
 import { calculateAge } from '../../utils/profileHelpers';
 import EmailVerificationBadge from '../EmailVerificationBadge';
+import { resendVerificationMailApi } from '../../api/authApi';
 
 function BasicProfileForm({ user, onUpdateLivePreview }) {
   const dispatch = useDispatch();
@@ -22,6 +23,8 @@ function BasicProfileForm({ user, onUpdateLivePreview }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loadingVerification, setLoadingVerification] = useState(false);
+  const [errVerification, setErrVerification] = useState('');
 
   const calculatedAge = calculateAge(dateOfBirth);
 
@@ -66,6 +69,23 @@ function BasicProfileForm({ user, onUpdateLivePreview }) {
     }
   };
 
+  const handleResendVerificationMail = async () => {
+    try {
+      setErrVerification('');
+      setLoadingVerification(true);
+      await resendVerificationMailApi({ emailId: user?.emailId });
+      const data = await viewProfileApi();
+      dispatch(addUser(data.data));
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setErrVerification(err?.response?.data?.error || 'Failed to resend verification mail');
+      setTimeout(() => setErrVerification(''), 4000);
+    } finally {
+      setLoadingVerification(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSave} className='space-y-4 text-base-content'>
       <div className='flex items-center justify-between border-b border-base-300 pb-2'>
@@ -92,19 +112,43 @@ function BasicProfileForm({ user, onUpdateLivePreview }) {
             size='sm'
           />
         </div>
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center justify-between md:flex-nowrap flex-wrap gap-2'>
           <input
             type='email'
             readOnly
             disabled
             value={user?.emailId || ''}
-            className='input input-bordered input-sm rounded-xl bg-base-200/80 text-xs font-medium w-full opacity-80 cursor-not-allowed'
+            className='w-full md:w-1/2 input input-bordered input-sm rounded-xl bg-base-200/80 text-xs font-medium opacity-80 cursor-not-allowed'
           />
+          {user?.isEmailVerified === false && !user?.verificationToken ? (
+            <div className='flex justify-end w-full md:w-1/2'>
+              <button
+                type='button'
+                className='btn btn-outline btn-secondary btn-sm rounded-xl'
+                onClick={handleResendVerificationMail}
+                disabled={loadingVerification}
+              >
+                {loadingVerification ? 'Sending...' : 'Resend Verification Mail'}
+              </button>
+            </div>
+          ) : (
+            ''
+          )}
         </div>
+        {errVerification && (
+          <p className='text-[11px] text-error flex items-center gap-1.5 font-medium'>
+            <span>⚠️</span>
+            <span>{errVerification}</span>
+          </p>
+        )}
         {!user?.isEmailVerified && (
           <p className='text-[11px] text-warning flex items-center gap-1.5 font-medium'>
             <span>✉️</span>
-            <span>Please check your inbox at <span className='font-bold underline'>{user?.emailId || 'registered email'}</span> to complete verification.</span>
+            <span>
+              Please check your inbox at{' '}
+              <span className='font-bold underline'>{user?.emailId || 'registered email'}</span> to
+              complete verification.
+            </span>
           </p>
         )}
       </div>
